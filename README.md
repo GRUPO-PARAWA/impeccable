@@ -13,6 +13,7 @@ Two ready-to-upload archives are tracked at the repo root. Download the one that
 | Form | File | What it contains |
 |---|---|---|
 | Organization **plugins** | [`impeccable-plugin.zip`](impeccable-plugin.zip) | `.claude-plugin/plugin.json` at the archive root, plus `skills/`, `agents/`, and `hooks/` |
+| Organization **plugins**, wrapped | [`impeccable-plugin-wrapped.zip`](impeccable-plugin-wrapped.zip) | The same tree inside a single `impeccable/` directory. Try this if the unwrapped form is rejected |
 | Organization **skills** | [`impeccable-skill.zip`](impeccable-skill.zip) | A single `impeccable/` directory holding `SKILL.md`, `reference/`, and `scripts/` |
 
 Open the file on GitHub and use **Download raw file**. Do not use **Code → Download ZIP**, and do not compress the repository folder yourself. Both produce the whole monorepo, which fails the upload with `Zip file contains path with invalid characters`: the SvelteKit test fixtures are named `+page.svelte` and `+layout.svelte`, as that framework requires, and the uploader rejects `+` in a path. A repository archive is also the wrong shape for the plugin form, which reads the manifest from the archive root.
