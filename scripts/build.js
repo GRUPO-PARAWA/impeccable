@@ -26,6 +26,7 @@ import { hooksJsonFor, buildClaudePluginHooksManifest } from './lib/transformers
 import { createAllZips, createProviderZip } from './lib/zip.js';
 import { collectPluginVersions } from './lib/validate-plugin-versions.js';
 import { collectPluginManifestFindings } from './lib/validate-plugin-manifest.js';
+import { collectNonAsciiFrontmatterFindings } from './lib/validate-metadata-ascii.js';
 import {
   rewritePluginMarkdownTree,
   rewritePluginAgentMarkdown,
@@ -166,6 +167,29 @@ function validatePluginManifestShape(rootDir) {
     );
   } else {
     console.log('✓ Plugin manifest shape matches the verified loader contract');
+  }
+  return findings.length;
+}
+
+/**
+ * Guard the uploadable payload's metadata (non-ASCII frontmatter). The pure
+ * check lives in ./lib/validate-metadata-ascii.js (so it's unit-tested
+ * directly); this wrapper owns the console output and the gating error count.
+ */
+function validateMetadataAscii(rootDir) {
+  const findings = collectNonAsciiFrontmatterFindings(rootDir);
+  for (const { relPath, line, text, chars, codes } of findings) {
+    const shown = chars.map((ch, i) => `${JSON.stringify(ch)} (${codes[i]})`).join(', ');
+    console.error(`  \u274c ${relPath} frontmatter line ${line}: non-ASCII ${shown}`);
+    console.error(`     ${text.slice(0, 120)}`);
+  }
+  if (findings.length > 0) {
+    console.error(
+      `\n\u274c ${findings.length} non-ASCII frontmatter line(s) in plugin/. Metadata fields are ` +
+      'machine-read and upload validators reject characters the CLI accepts; use ASCII. Prose is exempt.',
+    );
+  } else {
+    console.log('\u2713 Plugin frontmatter is ASCII-only');
   }
   return findings.length;
 }
@@ -815,6 +839,10 @@ async function build() {
   // does not honor (like the agents array, PR #494) ships silently broken.
   const manifestShapeErrors = validatePluginManifestShape(ROOT_DIR);
 
+  // Guard the uploadable payload's metadata: a non-ASCII byte in frontmatter is
+  // rejected by upload validators that the CLI's own checks never exercise.
+  const metadataAsciiErrors = validateMetadataAscii(ROOT_DIR);
+
   // Scan user-facing copy for AI tells (em dashes, marketing fluff, denylisted phrases)
   const proseErrors = validateProse(ROOT_DIR);
 
@@ -826,7 +854,7 @@ async function build() {
   // guidance to every provider at once.
   const askSiteErrors = validateAskInstructionSites(ROOT_DIR);
 
-  if (countErrors > 0 || versionErrors > 0 || manifestShapeErrors > 0 || proseErrors > 0 || skillProseErrors > 0 || askSiteErrors > 0) {
+  if (countErrors > 0 || versionErrors > 0 || manifestShapeErrors > 0 || metadataAsciiErrors > 0 || proseErrors > 0 || skillProseErrors > 0 || askSiteErrors > 0) {
     process.exit(1);
   }
 

@@ -51,6 +51,7 @@ export const SUITES = {
           'tests/validate-plugin-manifest.test.js',
           'tests/plugin-paths.test.js',
           'tests/plugin-zip.test.js',
+          'tests/validate-metadata-ascii.test.js',
         ],
       },
       {

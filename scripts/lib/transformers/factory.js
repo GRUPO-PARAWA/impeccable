@@ -293,7 +293,13 @@ export function createTransformer(config) {
       }
 
       // Replace {{command_hint}} in argument-hint with command names from metadata,
-      // grouped by category with middle dots between groups for natural line-breaking.
+      // grouped by category. The separator is ASCII on purpose: this used to be a
+      // middle dot (U+00B7), which made argument-hint the only frontmatter field
+      // in the whole payload carrying a non-ASCII byte. Upload validators parse
+      // metadata fields strictly and are known to reject characters the CLI
+      // accepts (claude-code #63081 rejects angle brackets in a description),
+      // so a decorative character in a machine-read field is not worth the risk.
+      // validateMetadataAscii in scripts/build.js keeps it that way.
       if (frontmatterObj['argument-hint']?.includes('{{command_hint}}')) {
         const metaScript = skill.scripts?.find(s => s.name === 'command-metadata.json');
         if (metaScript) {
@@ -302,7 +308,7 @@ export function createTransformer(config) {
           const grouped = CATEGORY_ORDER
             .map(cat => commands.filter(c => SKILL_CATEGORIES[c] === cat).join('|'))
             .filter(Boolean)
-            .join(' · ');
+            .join(' / ');
           frontmatterObj['argument-hint'] = frontmatterObj['argument-hint'].replace(
             '{{command_hint}}',
             grouped
