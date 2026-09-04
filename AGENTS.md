@@ -20,6 +20,7 @@
 - `bun run build:plugin-zip` - package the `plugin/` subtree as `dist/impeccable-plugin.zip` for an organization plugin upload, with a hard path validator.
 - `bun run build:skill-zip` - same validator, skill-shaped archive (a single `impeccable/` directory).
 - `npm run build:upload-zips` - refresh both tracked root artifacts (`impeccable-plugin.zip`, `impeccable-skill.zip`) that operators download from GitHub and upload.
+- `npm run check:zip -- <file.zip>` - diagnose a rejected upload. Run it on the file that was actually uploaded, not on a fresh build.
 - `bun run check:plugin-zip` - validate paths without writing an archive, and report repo-wide paths that would break a full-repo zip.
 
 Run `bun run build` after changing anything in `skill/`, transformer code, or user-facing counts. It validates the generated distribution under `dist/` without touching tracked root harness outputs. Use `bun run build:release` only when intentionally refreshing generated provider permutations for release/main-sync or build-system work.

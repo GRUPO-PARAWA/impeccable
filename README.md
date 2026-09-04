@@ -19,6 +19,14 @@ Open the file on GitHub and use **Download raw file**. Do not use **Code → Dow
 
 Refresh both files after any skill change with `npm run build:upload-zips`. The packager validates every path and refuses to write an archive the uploader would reject.
 
+If an upload is rejected anyway, run the diagnostic on the exact file you uploaded rather than on a fresh build:
+
+```bash
+node scripts/check-zip.mjs ~/Downloads/the-file-you-uploaded.zip
+```
+
+It reports the file's own name, entry name encoding, hidden segments, traversal, Finder residue, and whether the archive is plugin-shaped, skill-shaped, or a repository export. A browser that has already saved the file once names the second copy `impeccable-plugin (1).zip`, and that space and those brackets are enough to fail the upload.
+
 ## Why Impeccable?
 
 Anthropic's [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) was the first widely-used design skill for Claude. Impeccable started from there.

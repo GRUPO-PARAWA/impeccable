@@ -24,6 +24,7 @@
  *   node scripts/build-plugin-zip.mjs                 # dist/impeccable-plugin.zip
  *   node scripts/build-plugin-zip.mjs --skill         # dist/impeccable-skill.zip
  *   node scripts/build-plugin-zip.mjs --out <path>    # custom destination
+ *   node scripts/build-plugin-zip.mjs --claude-only   # drop .grok-plugin/ (plugin mode)
  *   node scripts/build-plugin-zip.mjs --wrap          # nest under <name>/ (plugin mode)
  *   node scripts/build-plugin-zip.mjs --check-only    # validate paths, write nothing
  *   node scripts/build-plugin-zip.mjs --scan-repo     # also report repo-wide offenders
@@ -46,6 +47,13 @@ const EXCLUDED_RELATIVE = new Set([
   path.join('.impeccable', 'hook.cache.json'),
   path.join('.impeccable', 'hook.pending.json'),
 ]);
+
+// Other harnesses' manifests. `.claude-plugin/` is mandatory in a plugin
+// archive, so a validator cannot be rejecting every dot-prefixed segment, but
+// it could well reject an unrecognized hidden directory. `.grok-plugin/` buys
+// nothing on a Claude upload (Grok installs the plugin/ subtree straight from
+// the repo), so --claude-only drops it and removes the question.
+const NON_CLAUDE_ROOTS = new Set(['.grok-plugin']);
 
 // The conservative intersection of what plugin-upload path validators accept:
 // ASCII letters, digits, dot, underscore, hyphen. Anything else (`+`, spaces,
@@ -132,13 +140,14 @@ function scanRepo() {
 }
 
 function parseArgs(argv) {
-  const opts = { out: null, wrap: false, checkOnly: false, scanRepo: false, skill: false };
+  const opts = { out: null, wrap: false, checkOnly: false, scanRepo: false, skill: false, claudeOnly: false };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--out') opts.out = argv[++i];
     else if (arg.startsWith('--out=')) opts.out = arg.slice('--out='.length);
     else if (arg === '--wrap') opts.wrap = true;
     else if (arg === '--skill') opts.skill = true;
+    else if (arg === '--claude-only') opts.claudeOnly = true;
     else if (arg === '--check-only') opts.checkOnly = true;
     else if (arg === '--scan-repo') opts.scanRepo = true;
     else throw new Error(`Unknown argument: ${arg}`);
@@ -167,7 +176,13 @@ async function main() {
   }
   const wrapDir = opts.skill || opts.wrap ? `${pluginName}/` : '';
 
-  const files = collectFiles(sourceDir);
+  let files = collectFiles(sourceDir);
+  if (opts.claudeOnly && !opts.skill) {
+    const before = files.length;
+    files = files.filter((rel) => !NON_CLAUDE_ROOTS.has(rel.split('/')[0]));
+    const dropped = before - files.length;
+    if (dropped > 0) console.log(`   Dropped ${dropped} file(s) under ${[...NON_CLAUDE_ROOTS].join(', ')} (--claude-only).`);
+  }
   if (files.length === 0) throw new Error(`No files found under ${path.relative(ROOT_DIR, sourceDir)}.`);
 
   const entries = files.map((rel) => ({

@@ -131,7 +131,15 @@ npm run check:plugin-zip         # validate paths only, plus a repo-wide report
 
 Either way the source must be `plugin/skills/impeccable/`, **never `.claude/skills/impeccable/`**. The `.claude/` copy resolves `{{scripts_path}}` to the project-relative `.claude/skills/impeccable/scripts/...`; run from an upload cache that path points into the user's project, which is issue #523 (MODULE_NOT_FOUND for a cache-only user, a silently stale local copy for a dual-install user). `plugin/` is the only tree the build rewrites to the `<skill-base-dir>` form, and `verifyPluginSkillRewrite` in `scripts/lib/plugin-paths.js` gates it. A zip made by hand from `.claude/` passes the path validator and then fails at runtime.
 
-The script rejects any entry whose path would trip the uploader, naming the offending character, and exits non-zero rather than producing an archive that fails at upload time. `--wrap` nests plugin mode under `<plugin-name>/` for uploaders that expect a single top-level directory; `--out` picks a different destination. Symlinks, `.DS_Store`, `Thumbs.db`, and the hook cache/pending state files are excluded.
+The script rejects any entry whose path would trip the uploader, naming the offending character, and exits non-zero rather than producing an archive that fails at upload time. `--wrap` nests plugin mode under `<plugin-name>/` for uploaders that expect a single top-level directory; `--claude-only` drops `.grok-plugin/`, which buys nothing on a Claude upload and is the only unrecognized hidden directory an uploader could object to (`build:plugin-zip:root` passes it); `--out` picks a different destination. Symlinks, `.DS_Store`, `Thumbs.db`, and the hook cache/pending state files are excluded.
+
+**When an upload is rejected anyway, do not re-guess the packager.** `scripts/check-zip.mjs` inspects an archive of unknown provenance and reports every objection a path validator could raise, which is a wider set than the packager's own gate: the file's own name (a second browser download becomes `name (1).zip`, with a space and brackets), non-ASCII and control characters in entry names, dot-prefixed segments, absolute and traversing paths, macOS Finder residue, depth and length, and whether the archive is plugin-shaped, skill-shaped, or a repository export.
+
+```bash
+npm run check:zip -- ~/Downloads/the-file-you-actually-uploaded.zip
+```
+
+Run it on the exact file that was rejected, not on a freshly built one. Every rejection so far has been a different file than the packager produced.
 
 If a future change adds a repo file with an unsafe path and something else needs a full-repo zip, `npm run check:plugin-zip` reports it before the upload does.
 
