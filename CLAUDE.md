@@ -113,6 +113,34 @@ Source files use placeholders that get replaced per-provider:
 - `{{available_commands}}` — auto-populated list of commands (from `IMPECCABLE_SUB_COMMANDS` in `scripts/lib/utils.js`)
 - `{{scripts_path}}` — provider-aware path to the skill's scripts directory
 
+### Packaging the plugin for an organization upload
+
+Organization-managed plugin uploads take a zip, and their path validator only accepts ASCII letters, digits, dot, underscore, and hyphen per segment. **Zipping the repository root fails** with `Zip file contains path with invalid characters`: six SvelteKit test fixtures carry the framework's mandated `+page.svelte` / `+layout.svelte` names, and `+` is outside the accepted set. Those names cannot change without breaking SvelteKit routing, and a plugin has no reason to ship the test suite.
+
+Package from the `plugin/` subtree instead. Two upload targets want two archive shapes, so `scripts/build-plugin-zip.mjs` has two modes:
+
+```bash
+bun run build:release            # regenerates plugin/ (node scripts/build.js also works)
+npm run build:plugin-zip         # plugin mode -> dist/impeccable-plugin.zip
+npm run build:skill-zip          # skill mode  -> dist/impeccable-skill.zip
+npm run build:skill-zip:root     # skill mode  -> ./impeccable-skill.zip (the tracked artifact)
+npm run check:plugin-zip         # validate paths only, plus a repo-wide report
+```
+
+**Plugin mode** puts `.claude-plugin/plugin.json` at the zip root alongside `skills/`, `agents/`, and `hooks/`. **Skill mode** packages `plugin/skills/impeccable/` wrapped in a single `impeccable/` directory, since a skill upload identifies the skill by that top-level directory name.
+
+Either way the source must be `plugin/skills/impeccable/`, **never `.claude/skills/impeccable/`**. The `.claude/` copy resolves `{{scripts_path}}` to the project-relative `.claude/skills/impeccable/scripts/...`; run from an upload cache that path points into the user's project, which is issue #523 (MODULE_NOT_FOUND for a cache-only user, a silently stale local copy for a dual-install user). `plugin/` is the only tree the build rewrites to the `<skill-base-dir>` form, and `verifyPluginSkillRewrite` in `scripts/lib/plugin-paths.js` gates it. A zip made by hand from `.claude/` passes the path validator and then fails at runtime.
+
+The script rejects any entry whose path would trip the uploader, naming the offending character, and exits non-zero rather than producing an archive that fails at upload time. `--wrap` nests plugin mode under `<plugin-name>/` for uploaders that expect a single top-level directory; `--out` picks a different destination. Symlinks, `.DS_Store`, `Thumbs.db`, and the hook cache/pending state files are excluded.
+
+If a future change adds a repo file with an unsafe path and something else needs a full-repo zip, `npm run check:plugin-zip` reports it before the upload does.
+
+`impeccable-skill.zip` is tracked at the repo root as the ready-to-upload artifact. It is a generated binary, so refresh it with `npm run build:skill-zip:root` after any skill change rather than editing or re-zipping by hand.
+
+### Grupo Parawa distribution
+
+This checkout is Grupo Parawa's internal build of upstream Impeccable (`pbakaus/impeccable`, Apache-2.0). Personalization is deliberately confined to authorship metadata and distribution URLs: `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `package.json`, the README install commands and credits, and the upstream attribution block in `NOTICE.md`. The plugin, skill, and command names are unchanged, so `/impeccable <command>` still works and upstream merges stay clean. `LICENSE` keeps the upstream copyright, which Apache-2.0 requires. The "Contributing, Issue, and PR Guidelines" section below is upstream policy and applies to the upstream repository.
+
 ### Generated provider output policy
 
 `.claude/skills/`, `.cursor/skills/`, `.agents/skills/`, and the other harness directories are **intentionally committed to the repo**. `npx skills` reads them directly from this repo at install time, and they enable clean submodule use. Do not gitignore them.

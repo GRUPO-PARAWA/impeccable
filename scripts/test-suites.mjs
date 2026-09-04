@@ -50,6 +50,7 @@ export const SUITES = {
           'tests/validate-plugin-versions.test.js',
           'tests/validate-plugin-manifest.test.js',
           'tests/plugin-paths.test.js',
+          'tests/plugin-zip.test.js',
         ],
       },
       {

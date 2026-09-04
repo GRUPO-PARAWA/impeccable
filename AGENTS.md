@@ -17,8 +17,19 @@
 - `bun run test:skill-behavior` - opt-in LLM-backed checks that the SKILL.md Setup flow actually drives the agent (runs claude-sonnet-5 / gpt-5.6-luna / gemini-3.5-flash / deepseek-v4-flash; needs `.env` with provider keys).
 - `bun run test:plugin-e2e` - just the plugin loader E2E, for fast iteration on `plugin/`, `skill/agents/`, or `scripts/build.js` changes.
 - `bun run build:browser` / `bun run build:extension` - rebuild browser-specific bundles.
+- `bun run build:plugin-zip` - package the `plugin/` subtree as `dist/impeccable-plugin.zip` for an organization plugin upload, with a hard path validator.
+- `bun run build:skill-zip` / `bun run build:skill-zip:root` - same validator, skill-shaped archive (a single `impeccable/` directory); the `:root` variant refreshes the tracked `impeccable-skill.zip`.
+- `bun run check:plugin-zip` - validate paths without writing an archive, and report repo-wide paths that would break a full-repo zip.
 
 Run `bun run build` after changing anything in `skill/`, transformer code, or user-facing counts. It validates the generated distribution under `dist/` without touching tracked root harness outputs. Use `bun run build:release` only when intentionally refreshing generated provider permutations for release/main-sync or build-system work.
+
+## Packaging for an organization plugin upload
+
+Never zip the repository root for a plugin or skill upload. The validator on the receiving end accepts only ASCII letters, digits, dot, underscore, and hyphen per path segment, and six SvelteKit fixtures under `tests/framework-fixtures/` carry the framework's mandated `+page.svelte` / `+layout.svelte` names, which produces `Zip file contains path with invalid characters`. Renaming them would break SvelteKit routing.
+
+Never zip `.claude/skills/impeccable/` either. It passes the path validator and then fails at runtime: its script instructions are project-relative (issue #523), so from an upload cache they point into the user's project. `plugin/skills/impeccable/` is the only tree the build rewrites to the `<skill-base-dir>` form.
+
+Run `bun run build:plugin-zip` or `bun run build:skill-zip` instead. Both package from `plugin/` and refuse to write an archive whose paths would be rejected. Details in `CLAUDE.md`.
 
 ## Generated Provider Output Policy
 

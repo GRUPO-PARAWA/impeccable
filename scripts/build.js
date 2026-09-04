@@ -744,7 +744,11 @@ async function build() {
       author: pluginManifest.author,
       homepage: pluginManifest.homepage,
       repository: pluginManifest.repository,
-      license: pluginManifest.license || 'MIT',
+      // The root plugin manifest carries no `license` key (the loader contract
+      // in validate-plugin-manifest.js does not allow one), so this fallback is
+      // what actually ships. It must match LICENSE and package.json; the old
+      // 'MIT' default published a license the project has never been under.
+      license: pluginManifest.license || 'Apache-2.0',
       keywords: ['design', 'frontend', 'ui', 'ux', 'skills', 'hooks'],
     };
     fs.mkdirSync(grokPluginManifestDir, { recursive: true });

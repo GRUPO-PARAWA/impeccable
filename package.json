@@ -1,7 +1,7 @@
 {
   "name": "impeccable",
   "version": "3.6.1",
-  "author": "Paul Bakaus",
+  "author": "Grupo Parawa <programador@grupoparawa.com>",
   "description": "Design skills, commands, and anti-pattern detection for AI coding agents",
   "keywords": [
     "design",
@@ -18,10 +18,13 @@
     "ci-cd"
   ],
   "license": "Apache-2.0",
-  "homepage": "https://impeccable.style",
+  "homepage": "https://github.com/GRUPO-PARAWA/impeccable",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pbakaus/impeccable.git"
+    "url": "git+https://github.com/GRUPO-PARAWA/impeccable.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GRUPO-PARAWA/impeccable/issues"
   },
   "engines": {
     "node": ">=22.18.0"
@@ -46,6 +49,10 @@
     "build:release": "bun run build:skills:release && mkdir -p build/_data && rm -rf build/_data/dist && cp -R dist build/_data/dist",
     "build:browser": "node scripts/build-browser-detector.js",
     "build:extension": "node scripts/build-extension.js",
+    "build:plugin-zip": "node scripts/build-plugin-zip.mjs",
+    "build:skill-zip": "node scripts/build-plugin-zip.mjs --skill",
+    "build:skill-zip:root": "node scripts/build-plugin-zip.mjs --skill --out impeccable-skill.zip",
+    "check:plugin-zip": "node scripts/build-plugin-zip.mjs --check-only --scan-repo",
     "clean": "rm -rf dist build",
     "rebuild": "bun run clean && bun run build",
     "rebuild:release": "bun run clean && bun run build:release",

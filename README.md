@@ -4,6 +4,8 @@ Design guidance for AI coding agents. 1 skill, 23 commands, live browser iterati
 
 > **Quick start:** From your project root, run `npx impeccable install`, then run `/impeccable init` inside your AI coding tool. Full docs: [impeccable.style](https://impeccable.style).
 
+> **Grupo Parawa distribution.** This repository is Grupo Parawa's internal build of [Impeccable](https://github.com/pbakaus/impeccable) by Paul Bakaus, used under Apache 2.0. Attribution and the upstream copyright are recorded in [NOTICE.md](NOTICE.md).
+
 ## Why Impeccable?
 
 Anthropic's [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) was the first widely-used design skill for Claude. Impeccable started from there.
@@ -120,7 +122,7 @@ See [Allow the hook in your harness](https://impeccable.style/docs/hooks#allow-t
 For teams that want to keep Impeccable vendored and updated through Git, add this repo as a submodule and link the compiled provider build into your harness folders:
 
 ```bash
-git submodule add https://github.com/pbakaus/impeccable .impeccable
+git submodule add https://github.com/GRUPO-PARAWA/impeccable .impeccable
 npx impeccable link --source=.impeccable --providers=claude,cursor
 git add .gitmodules .impeccable .claude .cursor
 git commit -m "Add Impeccable skills"
@@ -139,14 +141,14 @@ npx impeccable link --source=.impeccable --providers=claude,cursor
 
 **Claude Code:**
 ```bash
-/plugin marketplace add pbakaus/impeccable
+/plugin marketplace add GRUPO-PARAWA/impeccable
 ```
 
 > Claude Code only. After adding the marketplace, open `/plugin` and install Impeccable from the list.
 
 **Grok Build:**
 ```bash
-grok plugin install pbakaus/impeccable#plugin --trust
+grok plugin install GRUPO-PARAWA/impeccable#plugin --trust
 ```
 
 > Grok Build only. The `#plugin` suffix installs the slim plugin package (skills, agents, and hooks) instead of the full monorepo. Then run `/impeccable init` in a Grok session. Project-scoped installs via `npx impeccable install --providers=grok` also work and write `.grok/skills/` plus `.grok/hooks/impeccable.json`.
@@ -290,7 +292,7 @@ cp -r dist/grok/.grok your-project/
 cp -r dist/grok/.grok/skills/* ~/.grok/skills/
 ```
 
-> Prefer `npx impeccable install --providers=grok` or `grok plugin install pbakaus/impeccable#plugin --trust` so the design hook installs too. Project hooks need `/hooks-trust` (or `--trust`) once per folder.
+> Prefer `npx impeccable install --providers=grok` or `grok plugin install GRUPO-PARAWA/impeccable#plugin --trust` so the design hook installs too. Project hooks need `/hooks-trust` (or `--trust`) once per folder.
 
 **Google Antigravity:**
 ```bash
@@ -456,11 +458,13 @@ Full detector docs: [impeccable.style/docs/detector](https://impeccable.style/do
 
 ## Community & Ecosystem
 
-Join the community and ecosystem conversations:
+For anything specific to this build, open an issue in [GRUPO-PARAWA/impeccable](https://github.com/GRUPO-PARAWA/impeccable/issues).
 
-- GitHub Discussions: file bugs, request features, and help newcomers.
-- [Impeccable on npm](https://www.npmjs.com/package/impeccable): grab the CLI, follow releases, and star the package.
-- Follow @pbakaus on Twitter for release notes, sample lint reports, and video highlights of new rules.
+Upstream resources:
+
+- [impeccable.style](https://impeccable.style): full documentation and the detector rule catalog.
+- [Impeccable on npm](https://www.npmjs.com/package/impeccable): the published CLI and its release history.
+- [pbakaus/impeccable](https://github.com/pbakaus/impeccable): the upstream repository, where bugs in the skill itself belong.
 
 ## Contributing
 
@@ -472,4 +476,4 @@ Apache 2.0. See [LICENSE](LICENSE).
 
 ---
 
-Created by [Paul Bakaus](https://www.paulbakaus.com)
+Packaged for internal use by [Grupo Parawa](https://github.com/GRUPO-PARAWA). Created by [Paul Bakaus](https://www.paulbakaus.com).

@@ -5,8 +5,8 @@
     "description": "Design fluency for AI harnesses. 1 skill, 23 commands, and curated anti-patterns for impeccable frontend design."
   },
   "owner": {
-    "name": "Paul Bakaus",
-    "email": "paul@paulbakaus.com"
+    "name": "Grupo Parawa",
+    "email": "programador@grupoparawa.com"
   },
   "plugins": [
     {
@@ -14,12 +14,12 @@
       "description": "Design fluency for frontend development. 1 skill with 23 commands (/impeccable polish, /impeccable audit, /impeccable critique, etc.) and curated anti-pattern detection.",
       "version": "4.1.3",
       "author": {
-        "name": "Paul Bakaus",
-        "email": "paul@paulbakaus.com"
+        "name": "Grupo Parawa",
+        "email": "programador@grupoparawa.com"
       },
       "source": "./plugin",
       "category": "design",
-      "homepage": "https://impeccable.style",
+      "homepage": "https://github.com/GRUPO-PARAWA/impeccable",
       "tags": [
         "design",
         "frontend",
