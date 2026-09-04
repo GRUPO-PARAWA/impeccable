@@ -3,12 +3,12 @@
   "version": "4.1.3",
   "description": "Design fluency for frontend development. 1 skill with 23 commands (/impeccable polish, /impeccable audit, /impeccable critique, etc.) and curated anti-pattern detection.",
   "author": {
-    "name": "Paul Bakaus",
-    "email": "paul@paulbakaus.com"
+    "name": "Grupo Parawa",
+    "email": "programador@grupoparawa.com"
   },
-  "homepage": "https://impeccable.style",
-  "repository": "https://github.com/pbakaus/impeccable",
-  "license": "MIT",
+  "homepage": "https://github.com/GRUPO-PARAWA/impeccable",
+  "repository": "https://github.com/GRUPO-PARAWA/impeccable",
+  "license": "Apache-2.0",
   "keywords": [
     "design",
     "frontend",
