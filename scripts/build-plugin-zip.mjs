@@ -53,6 +53,12 @@ const EXCLUDED_RELATIVE = new Set([
 // error here rather than a surprise at upload time.
 const SAFE_SEGMENT = /^[A-Za-z0-9._-]+$/;
 
+// Both root archives are tracked in git, so identical content must produce
+// identical bytes. Without a fixed entry timestamp archiver stamps each file's
+// mtime and every rebuild is a fresh 1.6 MB blob in history, whether or not
+// anything changed. The value is arbitrary; only its stability matters.
+const FIXED_ENTRY_DATE = new Date('2020-01-01T00:00:00Z');
+
 /**
  * Explain why a single archive path is unsafe, or return null when it is fine.
  * @param {string} relPath - Archive-relative path, POSIX separators.
@@ -72,6 +78,15 @@ export function describePathProblem(relPath) {
     }
   }
   return null;
+}
+
+/**
+ * Order archive entries by path so the output does not depend on read order.
+ * @param {{abs: string, archive: string}[]} entries
+ * @returns {{abs: string, archive: string}[]}
+ */
+export function sortedEntries(entries) {
+  return [...entries].sort((a, b) => (a.archive < b.archive ? -1 : a.archive > b.archive ? 1 : 0));
 }
 
 /**
@@ -203,7 +218,15 @@ async function main() {
     archive.on('error', reject);
     archive.on('entry', () => { entryCount += 1; });
     archive.pipe(output);
-    for (const entry of entries) archive.file(entry.abs, { name: entry.archive });
+    // Buffers, not paths, and in sorted order. `archive.file()` reads from disk
+    // asynchronously and emits entries as those reads complete, so a handful of
+    // entries swap places between runs and the archive bytes differ even when
+    // every file is identical. Appending buffers removes the race, which is
+    // what makes the tracked artifacts reproducible. The whole payload is
+    // ~1.6 MB, so holding it in memory costs nothing worth optimizing.
+    for (const entry of sortedEntries(entries)) {
+      archive.append(fs.readFileSync(entry.abs), { name: entry.archive, date: FIXED_ENTRY_DATE });
+    }
     archive.finalize();
   });
 

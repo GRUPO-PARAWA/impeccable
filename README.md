@@ -6,6 +6,19 @@ Design guidance for AI coding agents. 1 skill, 23 commands, live browser iterati
 
 > **Grupo Parawa distribution.** This repository is Grupo Parawa's internal build of [Impeccable](https://github.com/pbakaus/impeccable) by Paul Bakaus, used under Apache 2.0. Attribution and the upstream copyright are recorded in [NOTICE.md](NOTICE.md).
 
+### Uploading to a Claude organization
+
+Two ready-to-upload archives are tracked at the repo root. Download the one that matches the form you are using and upload it as-is:
+
+| Form | File | What it contains |
+|---|---|---|
+| Organization **plugins** | [`impeccable-plugin.zip`](impeccable-plugin.zip) | `.claude-plugin/plugin.json` at the archive root, plus `skills/`, `agents/`, and `hooks/` |
+| Organization **skills** | [`impeccable-skill.zip`](impeccable-skill.zip) | A single `impeccable/` directory holding `SKILL.md`, `reference/`, and `scripts/` |
+
+Open the file on GitHub and use **Download raw file**. Do not use **Code → Download ZIP**, and do not compress the repository folder yourself. Both produce the whole monorepo, which fails the upload with `Zip file contains path with invalid characters`: the SvelteKit test fixtures are named `+page.svelte` and `+layout.svelte`, as that framework requires, and the uploader rejects `+` in a path. A repository archive is also the wrong shape for the plugin form, which reads the manifest from the archive root.
+
+Refresh both files after any skill change with `npm run build:upload-zips`. The packager validates every path and refuses to write an archive the uploader would reject.
+
 ## Why Impeccable?
 
 Anthropic's [frontend-design](https://github.com/anthropics/skills/tree/main/skills/frontend-design) was the first widely-used design skill for Claude. Impeccable started from there.

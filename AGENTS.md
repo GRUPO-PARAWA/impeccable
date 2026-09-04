@@ -18,7 +18,8 @@
 - `bun run test:plugin-e2e` - just the plugin loader E2E, for fast iteration on `plugin/`, `skill/agents/`, or `scripts/build.js` changes.
 - `bun run build:browser` / `bun run build:extension` - rebuild browser-specific bundles.
 - `bun run build:plugin-zip` - package the `plugin/` subtree as `dist/impeccable-plugin.zip` for an organization plugin upload, with a hard path validator.
-- `bun run build:skill-zip` / `bun run build:skill-zip:root` - same validator, skill-shaped archive (a single `impeccable/` directory); the `:root` variant refreshes the tracked `impeccable-skill.zip`.
+- `bun run build:skill-zip` - same validator, skill-shaped archive (a single `impeccable/` directory).
+- `npm run build:upload-zips` - refresh both tracked root artifacts (`impeccable-plugin.zip`, `impeccable-skill.zip`) that operators download from GitHub and upload.
 - `bun run check:plugin-zip` - validate paths without writing an archive, and report repo-wide paths that would break a full-repo zip.
 
 Run `bun run build` after changing anything in `skill/`, transformer code, or user-facing counts. It validates the generated distribution under `dist/` without touching tracked root harness outputs. Use `bun run build:release` only when intentionally refreshing generated provider permutations for release/main-sync or build-system work.
@@ -29,7 +30,7 @@ Never zip the repository root for a plugin or skill upload. The validator on the
 
 Never zip `.claude/skills/impeccable/` either. It passes the path validator and then fails at runtime: its script instructions are project-relative (issue #523), so from an upload cache they point into the user's project. `plugin/skills/impeccable/` is the only tree the build rewrites to the `<skill-base-dir>` form.
 
-Run `bun run build:plugin-zip` or `bun run build:skill-zip` instead. Both package from `plugin/` and refuse to write an archive whose paths would be rejected. Details in `CLAUDE.md`.
+Upload one of the tracked root artifacts instead: `impeccable-plugin.zip` for the plugin form, `impeccable-skill.zip` for the skill form. Both are produced by `npm run build:upload-zips`, which packages from `plugin/` and refuses to write an archive whose paths would be rejected. Details in `CLAUDE.md`.
 
 ## Generated Provider Output Policy
 

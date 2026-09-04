@@ -121,9 +121,9 @@ Package from the `plugin/` subtree instead. Two upload targets want two archive 
 
 ```bash
 bun run build:release            # regenerates plugin/ (node scripts/build.js also works)
+npm run build:upload-zips        # both tracked root artifacts, the usual command
 npm run build:plugin-zip         # plugin mode -> dist/impeccable-plugin.zip
 npm run build:skill-zip          # skill mode  -> dist/impeccable-skill.zip
-npm run build:skill-zip:root     # skill mode  -> ./impeccable-skill.zip (the tracked artifact)
 npm run check:plugin-zip         # validate paths only, plus a repo-wide report
 ```
 
@@ -135,7 +135,7 @@ The script rejects any entry whose path would trip the uploader, naming the offe
 
 If a future change adds a repo file with an unsafe path and something else needs a full-repo zip, `npm run check:plugin-zip` reports it before the upload does.
 
-`impeccable-skill.zip` is tracked at the repo root as the ready-to-upload artifact. It is a generated binary, so refresh it with `npm run build:skill-zip:root` after any skill change rather than editing or re-zipping by hand.
+**`impeccable-plugin.zip` and `impeccable-skill.zip` are tracked at the repo root**, one per upload form, because the operator gets them by downloading a single file from GitHub. An artifact that only exists in gitignored `dist/` is not reachable that way, which is how the first attempt ended up uploading `Code -> Download ZIP` instead. They are generated binaries: refresh both with `npm run build:upload-zips` after any skill change, never by re-zipping a directory. Two 1.6 MB blobs per refresh do accumulate in history; if that becomes a problem, move them to release assets and update the README table.
 
 ### Grupo Parawa distribution
 

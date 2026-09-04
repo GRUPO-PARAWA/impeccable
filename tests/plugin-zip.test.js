@@ -13,7 +13,7 @@
 import { describe, test, expect } from 'bun:test';
 import fs from 'fs';
 import path from 'path';
-import { describePathProblem } from '../scripts/build-plugin-zip.mjs';
+import { describePathProblem, sortedEntries } from '../scripts/build-plugin-zip.mjs';
 
 const REPO_ROOT = path.resolve(import.meta.dir, '..');
 
@@ -59,6 +59,29 @@ describe('describePathProblem', () => {
     expect(describePathProblem('skills\\impeccable\\SKILL.md')).toBe('contains a backslash');
     expect(describePathProblem('skills//SKILL.md')).toBe('contains an empty path segment');
     expect(describePathProblem('')).toBe('empty path');
+  });
+});
+
+describe('sortedEntries', () => {
+  test('orders by archive path regardless of input order', () => {
+    // Both root archives are tracked in git, so an unstable entry order means
+    // a fresh 1.6 MB blob in history on every rebuild even when nothing moved.
+    const entries = [
+      { abs: '/tmp/b', archive: 'skills/impeccable/SKILL.md' },
+      { abs: '/tmp/a', archive: '.claude-plugin/plugin.json' },
+      { abs: '/tmp/c', archive: 'agents/impeccable-documenter.md' },
+    ];
+    expect(sortedEntries(entries).map((e) => e.archive)).toEqual([
+      '.claude-plugin/plugin.json',
+      'agents/impeccable-documenter.md',
+      'skills/impeccable/SKILL.md',
+    ]);
+  });
+
+  test('does not mutate the caller\'s array', () => {
+    const entries = [{ abs: '/b', archive: 'b' }, { abs: '/a', archive: 'a' }];
+    sortedEntries(entries);
+    expect(entries.map((e) => e.archive)).toEqual(['b', 'a']);
   });
 });
 
